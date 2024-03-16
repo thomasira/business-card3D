@@ -3,14 +3,17 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const loader = new GLTFLoader();
 const cardData = await loader.loadAsync('asset/holographic_card.glb');
 const card = cardData.scene.children[0];
+console.log(cardData)
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+
 renderer.shadowMap.enabled = true;
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const plight = new THREE.SpotLight(0xf0f0ff);
+const plight = new THREE.SpotLight(0xfffaed);
 plight.size = 100
 plight.penumbra = 6;
 plight.intensity = 400;
@@ -27,11 +30,23 @@ slight2.position.set(2, -2, 5);
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
+const testPlane = new THREE.PlaneGeometry(6,6)
+const testMaterial = new THREE.MeshStandardMaterial(0xffffff)
+const test = new THREE.Mesh(testPlane,testMaterial)
+test.position.set(0, 0 ,-2)
+scene.add(test)
 const base = -Math.PI/2
+card.material.transparent = true;
+card.material.opacity =.3;
+
+console.log(card)
 card.rotateX(base)
 scene.add(card)
 scene.add(plight);
 scene.add(slight2);
+
+/* cardBack.rotateX(base)
+scene.add(cardBack) */
 
 /**
  * catch cursor intersection on card, apply rotation to card based on cursor weight
@@ -51,8 +66,8 @@ function onPointerMove(event) {
     for ( let i = 0; i < intersects.length; i ++ ) {
 
         /* scale card */
-        card.scale.x = 1.2
-        card.scale.z = 1.2
+/*         card.scale.y = 1.1
+        card.scale.z = 1.1 */
 
         /* apply weight to cursor -> change for more or less rotation */
         const weight = 0.03
@@ -67,8 +82,8 @@ function onPointerMove(event) {
 
     /* reset card scale and position if no intersections */
     if(!intersects[0]) {
-        card.scale.x = 1
-        card.scale.z = 1
+/*         card.scale.y = 1
+        card.scale.z = 1 */
         card.rotation.x = base
         card.rotation.z = 0
     }
@@ -88,10 +103,14 @@ function scrollZoom(e) {
     const maxZoom = 5;
     const minZoom = 25;
 
+    //scroll zoom
     if(e.deltaY > 0 && camera.position.z < minZoom) camera.position.z += 1;
     if(e.deltaY < 0 && camera.position.z > maxZoom) camera.position.z -= 1;
-}
 
+    //keyboard zoom
+    if(e.keyCode == 38 && camera.position.z > maxZoom) camera.position.z -= 1;
+    if(e.keyCode == 40 && camera.position.z < minZoom) camera.position.z += 1;
+}
 
 
 function loop () {
@@ -108,7 +127,8 @@ function animate() {
 }
 animate()
 window.addEventListener( 'pointermove', onPointerMove );
-window.addEventListener('wheel', scrollZoom)
+window.addEventListener('wheel', scrollZoom);
+window.addEventListener('keydown', scrollZoom);
 
 /**
  * resize renderer according to screen resize
