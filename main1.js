@@ -14,10 +14,9 @@ const scene = new THREE.Scene();
 // instanciate new camera
 const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-const base = -Math.PI/2
 // instanciate and define spot light 1
 const slight1 = new THREE.SpotLight(0xfffaed)
-slight1.intensity = 100
+slight1.intensity = 10
 slight1.penumbra = 1
 slight1.angle = Math.PI/3
 slight1.castShadow = true;
@@ -29,8 +28,8 @@ slight1.shadow.radius = 5
 slight1.shadow.focus = 2; // default
 
 // instanciate and define spot light 2
-const slight2 = new THREE.SpotLight(0x3d85c6)
-slight2.intensity = 10;
+const slight2 = new THREE.SpotLight(0x385928)
+slight2.intensity = 2;
 slight2.penumbra = 1;
 slight2.castShadow = true
 
@@ -49,42 +48,37 @@ slight5.penumbra = 1.4;
 slight5.angle = Math.PI/1
 
 // set items position
-camera.position.set(0, 0, 15);
+camera.position.set(0, 0, 1);
 const planeModel = new THREE.PlaneGeometry(100, 100)
 const planeMaterial = new THREE.MeshPhysicalMaterial({
   color: 0x0a1008,
   roughness: 1,
 }) 
 const plane = new THREE.Mesh( planeModel, planeMaterial)
-plane.position.set(0, 0, 0)
+plane.position.set(0, 0, -1)
 
-slight1.position.set(4, 4, 3);
+slight1.position.set(4, 4, 0);
 slight2.position.set(-4, 2, 5);
 slight3.position.set(10, 2, 40);
 slight4.position.set(14, 14, 4);
-slight5.position.set(-1, -1, 5);
-
 slight4.target.position.set(0, 0, 0)
-slight4.target.updateMatrixWorld()
+slight5.position.set(-1, -1, 5);
+card.position.set(0, 0, 0)
 
-scene.fog = new THREE.Fog( 0x686d71, 0, 50 );
+/* scene.fog = new THREE.Fog( 0x686d71, 0, 50 ); */
 scene.add(plane)
 scene.add(slight1);
 scene.add(slight2);
+/* 
 scene.add(slight3);
 scene.add(slight4);
-scene.add(slight5);
+scene.add(slight5); */
 scene.add(card)
 plane.receiveShadow = true
-card.rotateX(base)
-
-card.position.set(0, 0, 3)
-card.name = 'card'
 
 // instanciate ray caster(for cursor intersect)
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
-
 
 /**
  * catch cursor intersection on card, apply rotation to card based on cursor weight
@@ -108,44 +102,25 @@ function onPointerMove(event) {
         overCard = true
 
         /* scale card */
-        if(card.scale.z <= 1.2) card.scale.z += .02
+        if(card.scale.y <= 1.2) card.scale.y += .02
         if(card.scale.x <= 1.2) card.scale.x += .02
         
-  
         /* apply weight to cursor -> change for more or less rotation */
-        const weight = 0.05
+        const weight = .8
   
         /* apply rotation of card based on weight */
         let x = intersects[i].point.x
         let y = intersects[i].point.y
   
-        card.rotation.z = x * weight
-        card.rotation.x = base - (y * weight * 2)
+        card.rotation.x = - y * weight *1.2
+        card.rotation.y = x * weight /2
       }
     }
     /* reset card scale and position if no intersections */
-    if(!intersects[0] || intersects[0].object.name != 'overlay') {
+    if(!intersects[0] || intersects[0].object.name != 'overlay')
+    {
         if(overCard == true) overCard = 2
     }
-}
-
-/**
- * zoom on wheel event
- * @param {*} e 
- */
-function scrollZoom(e) {
-
-    /* zoom limits */
-    const maxZoom = 5;
-    const minZoom = 25;
-
-    //scroll zoom
-    if(e.deltaY > 0 && camera.position.z < minZoom) camera.position.z += 1;
-    if(e.deltaY < 0 && camera.position.z > maxZoom) camera.position.z -= 1;
-
-    //keyboard zoom
-    if(e.keyCode == 38 && camera.position.z > maxZoom) camera.position.z -= 1;
-    if(e.keyCode == 40 && camera.position.z < minZoom) camera.position.z += 1;
 }
 
 function loop ()
@@ -184,16 +159,15 @@ function animate()
 {
     requestAnimationFrame( animate );
     checkOverCard()
-    loop()
     render()
 }
 function checkOverCard()
 {
   if(overCard == 2)
   {
-    if(card.scale.z >= 1.04 && !card.scale.z <= 0) 
+    if(card.scale.y >= 1.04 && !card.scale.y <= 0) 
     {
-      card.scale.z -= 0.04
+      card.scale.y -= 0.04
     }
     if(card.scale.x >= 1.04 && !card.scale.x <= 0)
     {
@@ -203,35 +177,13 @@ function checkOverCard()
       overCard = false
       rotateX = 0
       rotateZ = 0
-      card.rotation.x = base
-      card.rotation.z = 0
+      card.rotation.x = 0
+      card.rotation.y = 0
     }
   }
 }
-function render() {
-  renderer.render( scene, camera );
-}
-
-var overCard = false
-var rotateX = 0
-var rotateZ = 0
-var loopX = true
-var loopZ = true
 animate()
 window.addEventListener('pointermove', onPointerMove)
-window.addEventListener('wheel', scrollZoom)
-window.addEventListener('keydown', scrollZoom)
-
-
-/**
- * resize renderer according to screen resize
-*/
-renderer.setPixelRatio(.6/* window.devicePixelRatio */);
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
 
 
 

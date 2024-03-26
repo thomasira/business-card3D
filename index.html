@@ -10,24 +10,17 @@
 		margin: 0; 
 		position: relative;
 		background-color: blueviolet;
-		display: flex;
-		justify-content: center;
+		min-height: 100vh;
 	}
 	div { 
 		position: absolute;
-		color: rgb(137, 137, 137);
-		font-family: sans-serif;
-
-		& h1, h2{
-			font-weight: 400;
-		}
-	canvas {
-		position: sticky;
-		top: 0;
-	}
+		width: 100%;
+		min-height: 100%;
 	}
 </style>
+<script type="module" src="src/main.js"></script>
 <body>
-	<script type="module" src="/main.js"></script>
+	<div id="scene-container">
+	</div>
 </body>
 </html>
